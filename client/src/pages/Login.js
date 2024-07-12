@@ -3,16 +3,25 @@ import { Button, Form, Input } from "antd";
 import { Link , useNavigate } from "react-router-dom";
 
 import {message} from 'antd'
+import { loginUser } from '../calls/users';
 
 
 function Login() {
-  
+  const navigate = useNavigate();
   const onFinish = async (values)=>{
     console.log(values)
-   
+    try {
+      const response = await loginUser(values);
+      if (response.success){
+        message.success(response.message);
+        navigate('/');
+      }
+      else message.error(response.message);
+    } catch (err) {
+      message.error(err.message);
+    }
   }
 
- 
   return (
     <>
     <header className="App-header">

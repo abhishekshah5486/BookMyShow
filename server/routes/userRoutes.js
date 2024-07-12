@@ -31,7 +31,10 @@ router.post("/register", async (req, res) => {
         req.body.password = hashedPassword;
         const newUser = new User(req.body);
         await newUser.save();
-        return res.status(201).json(newUser);
+        res.send({
+            success: true,
+            message: "Mubarak Hoo, Aap Register hogye."
+        });
 
     } catch (err) {
         res.json(err);
