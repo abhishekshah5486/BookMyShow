@@ -1,5 +1,6 @@
 const express = require("express");
 const User = require("../models/userModel");
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 const bcrypt = require('bcrypt');
@@ -61,9 +62,12 @@ router.post("/login", async (req, res) => {
             message: "Invalid Password"
         })
     }
+
+    const token = jwt.sign({userId : user.id}, process.env.JWT_SECRET, {expiresIn : "1d"});
     res.send({
         success: true,
-        message: "User logged in."
+        message: "User logged in.",
+        token: token,
     })
   } catch (err) {
     res.json(err);
