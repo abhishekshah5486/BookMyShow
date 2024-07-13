@@ -14,6 +14,7 @@ function Login() {
       const response = await loginUser(values);
       if (response.success){
         message.success(response.message);
+        localStorage.setItem('token', response.token);
         navigate('/');
       }
       else message.error(response.message);
@@ -21,6 +22,10 @@ function Login() {
       message.error(err.message);
     }
   }
+
+  // Concept of Bearer
+  
+
 
   return (
     <>

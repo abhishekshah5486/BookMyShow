@@ -1,6 +1,7 @@
 const express = require("express");
 const User = require("../models/userModel");
 const jwt = require('jsonwebtoken');
+import authMiddleware from "../middlewares/authMiddleware";
 
 const router = express.Router();
 const bcrypt = require('bcrypt');
@@ -14,12 +15,12 @@ router.post("/register", async (req, res) => {
         //     password: req.body.password
         // });
         const userExists = await User.findOne({email: req.body.email});
-        // if (userExists){
-        //     res.send({
-        //         success: false,
-        //         message: "User already exists"
-        //     })
-        // }
+        if (userExists){
+            res.send({
+                success: false,
+                message: "User already exists"
+            })
+        }
         // const newUser = new User(req.body);
         // await newUser.save();
         // return res.status(201).json(newUser);
@@ -75,5 +76,19 @@ router.post("/login", async (req, res) => {
 
 });
 
-
+router.get('/get-current-user', authMiddleware, async(req, res) => {
+   try {
+    const user = await User.findById(req.body.userId).select('-password');
+    res.send({
+        sucess: true,
+        message: "You are authorized.",
+        data: user
+    })
+   } catch (err) {
+    res.send({
+        success: false,
+        message: "Not authorized"
+    })
+   }
+})
 module.exports = router;
