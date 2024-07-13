@@ -8,6 +8,13 @@ import { loginUser } from '../calls/users';
 
 function Login() {
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    if (localStorage.getItem('token')){
+      navigate('/');
+    }
+  })
+
   const onFinish = async (values)=>{
     console.log(values)
     try {

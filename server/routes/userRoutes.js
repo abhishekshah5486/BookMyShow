@@ -1,7 +1,7 @@
 const express = require("express");
 const User = require("../models/userModel");
 const jwt = require('jsonwebtoken');
-import authMiddleware from "../middlewares/authMiddleware";
+const authMiddleware =  require("../middlewares/authMiddleware");
 
 const router = express.Router();
 const bcrypt = require('bcrypt');
@@ -35,7 +35,7 @@ router.post("/register", async (req, res) => {
         await newUser.save();
         res.send({
             success: true,
-            message: "Mubarak Hoo, Aap Register hogye."
+            message: "User registered successfully."
         });
 
     } catch (err) {
