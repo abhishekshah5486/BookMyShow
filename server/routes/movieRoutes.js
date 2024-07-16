@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const Movie = require('../models/movieModel')
 
-// Add a Movi
+// Add a Movie
 
 router.post('/add-movie' , async (req , res)=>{
     try {
@@ -30,7 +30,7 @@ router.get('/get-all-movies' , async(req , res)=>{
             message: 'All movies have been fetched!',
             data: allMovies
         });
-        
+
     } catch (error) {
         res.send({
             success: false,
