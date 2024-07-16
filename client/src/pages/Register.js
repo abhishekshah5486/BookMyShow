@@ -1,23 +1,30 @@
 import React, { useEffect } from "react";
 import { Form, Input, Button, Radio, message } from "antd";
 import { Link, useNavigate } from "react-router-dom";
-import { registerUser } from "../calls/users";
-
+import { RegisterUser } from "../calls/users";
 
 function Register() {
   const onFinish = async (values) => {
     console.log(values);
     try {
-      const response = await registerUser(values);
-      if (response.success){
+      const response = await RegisterUser(values);
+      if (response.success) {
         message.success(response.message);
+      } else {
+        message.error(response.message);
       }
-      else message.error(response.message);
-    } catch (err) {
-      message.error(err.message);
+    } catch (error) {
+      message.error(error.message);
     }
   };
 
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/");
+    }
+  }, []);
 
   return (
     <>
