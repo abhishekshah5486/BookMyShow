@@ -14,108 +14,97 @@ import {
 import { Link } from "react-router-dom";
 import { setUser } from "../redux/userSlice";
 
-function ProtectedRoute({ children }) {
+function ProtectedRoute({ children, allowedRoles }) {
   const { user } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const navItems = [
-    {
-      label: <Link to="/">Home</Link>,
-      icon: <HomeOutlined />, 
-    },
-
-    {
-      label: `${user ? user.name : ""}`,
-      icon: <UserOutlined />,
-      children: [
-        {
-          label: (
-            <span
-            onClick={() => {
-              if (user.role === "admin") {
-                navigate("/admin");
-              } else if (user.role === "partner") {
-                navigate("/partner");
-              } else {
-                navigate("/profile");
-              }
-            }}
-            >
-              My Profile
-            </span>
-          ),
-          icon: <ProfileOutlined />,
-        },
-
-        {
-          label: (
-            <Link
-              to="/login"
-              onClick={() => {
-                localStorage.removeItem("token");
-              }}
-            >
-              Log Out
-            </Link>
-          ),
-          icon: <LogoutOutlined />,
-        },
-      ],
-    },
-  ];
-
-  const getValidUser = async () => {
-    try {
-      dispatch(showLoading());
-      const response = await GetCurrentUser();
-      console.log(response);
-      dispatch(setUser(response.data));
-      dispatch(hideLoading());
-      // Hide Loader
-    } catch (error) {
-      dispatch(setUser(null));
-      message.error(error.message);
-    }
-  };
-
   useEffect(() => {
-    if (localStorage.getItem("token")) {
+    const token = localStorage.getItem("token");
+    if (token) {
       getValidUser();
     } else {
       navigate("/login");
     }
   }, []);
 
-  return (
-    user && (
-      <>
-        <Layout>
-          <Header
-            className="d-flex justify-content-between"
-            style={{
-              position: "sticky",
-              top: 0,
-              zIndex: 1,
-              width: "100%",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <Link to="/">
-              <h3 className="demo-logo text-white m-0" style={{ color: "white" }}>
-                Book My Show
-              </h3>
-            </Link>
-            <Menu theme="dark" mode="horizontal" items={navItems} />
-          </Header>
-          <div style={{ padding: 24, minHeight: 380, background: "#fff" }}>
-            {children}
-          </div>
-        </Layout>
-      </>
-    )
-  );
+  const getValidUser = async () => {
+    try {
+      dispatch(showLoading());
+      const response = await GetCurrentUser();
+      dispatch(setUser(response.data));
+      dispatch(hideLoading());
+      // Check if the user's role is not allowed
+      if (!allowedRoles.includes(response.data.role)) {
+        navigate("/unauthorized");
+      }
+    } catch (error) {
+      dispatch(setUser(null));
+      // message.error(error.message);
+    }
+  };
+
+    navigate("/login");
+  }
+  // Only render children if there is a user and the user's role is allowed
+  return user ? (
+    <Layout>
+      <Header
+        className="d-flex justify-content-between"
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 1,
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        <Link to="/">
+          <h3 className="demo-logo text-white m-0">Book My Show</h3>
+        </Link>
+        <Menu
+          theme="dark"
+          mode="horizontal"
+          items={[
+            { label: <Link to="/">Home</Link>, icon: <HomeOutlined /> },
+            {
+              label: `${user ? user.name : ""}`,
+              icon: <UserOutlined />,
+              children: [
+                {
+                  label: (
+                    <span onClick={() => navigate(`/${user.role}`)}>
+                      My Profile
+                    </span>
+                  ),
+                  icon: <ProfileOutlined />,
+                },
+                {
+                  label: (
+                    <Link
+                      to="/login"
+                      onClick={() => {
+                        localStorage.removeItem("token");
+                        dispatch(setUser(null));
+                        navigate("/login");
+                      }}
+                    >
+                      Log Out
+                    </Link>
+                  ),
+                  icon: <LogoutOutlined />,
+                },
+              ],
+            },
+          ]}
+        />
+      </Header>
+      <div style={{ padding: 24, minHeight: 380, background: "#fff" }}>
+        {children}
+      </div>
+    </Layout>
+  ) : null;
 }
 
 export default ProtectedRoute;
